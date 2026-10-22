@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import CategoryFilter from '~/components/catalog/CategoryFilter.vue'
+import { formatCategoryLabel } from '~/utils/format'
+import { t } from '../helpers/i18n'
 
 /**
  * The category filter is the multi-select control: several categories can be
  * active at once, and each change emits the *whole* new selection so the parent
- * stays the single source of truth.
+ * stays the single source of truth. Labels are asserted against the same
+ * formatter and i18n messages the component renders through.
  */
 describe('CategoryFilter', () => {
   const categories = ['electronics', 'jewelery']
@@ -16,10 +19,10 @@ describe('CategoryFilter', () => {
     })
 
     const labels = wrapper.findAll('.cats__label').map((label) => label.text())
-    expect(labels).toEqual(['الکترونیک', 'زیورآلات'])
+    expect(labels).toEqual(categories.map((category) => formatCategoryLabel(category)))
     expect(wrapper.findAll('input[type="checkbox"]')).toHaveLength(categories.length)
     expect(wrapper.get('.cats').attributes('aria-label')).toBe(
-      'فیلتر بر پایهٔ دستهبندی'
+      t('catalog.categories.filterAria')
     )
   })
 
@@ -52,6 +55,8 @@ describe('CategoryFilter', () => {
 
     await wrapper.findAll('input')[1].trigger('change')
 
-    expect(wrapper.emitted('update:modelValue')).toEqual([[]])
+    // `emitted()` returns one entry per emit call, each holding that call's
+    // argument list — so a single call carrying an empty selection is `[[[]]]`.
+    expect(wrapper.emitted('update:modelValue')).toEqual([[[]]])
   })
 })

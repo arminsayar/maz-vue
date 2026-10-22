@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatCategoryLabel } from '~/utils/format'
+import { useI18n } from 'vue-i18n'
+import { useFormatters } from '~/composables/useFormatters'
 
 /**
  * Active-filter summary, rendered as the card that sits on top of the product
@@ -13,6 +14,8 @@ import { formatCategoryLabel } from '~/utils/format'
  *
  * The card renders nothing at all when no constraint is active, so the grid
  * starts flush with the toolbar instead of leaving an empty panel behind.
+ * Category labels resolve through the locale-aware formatter, and the chip copy
+ * (search term, removal labels, clear-all) comes from `catalog.active.*`.
  */
 const props = defineProps<{
   search: string
@@ -25,22 +28,27 @@ const emit = defineEmits<{
   'clear-all': []
 }>()
 
+const { t } = useI18n()
+const { categoryLabel } = useFormatters()
+
 const hasAny = computed(() =>
   Boolean(props.search.trim() || props.categories.length)
 )
+
+const searchTerm = computed(() => props.search.trim())
 </script>
 
 <template>
-  <section v-if="hasAny" class="active" aria-label="فیلترهای اعمال شده">
-    <p class="active__title">فیلترهای اعمال شده</p>
+  <section v-if="hasAny" class="active" :aria-label="t('catalog.active.title')">
+    <p class="active__title">{{ t('catalog.active.title') }}</p>
 
     <ul class="active__list">
-      <li v-if="search.trim()">
+      <li v-if="searchTerm">
         <button type="button" class="active__chip" @click="emit('clear-search')">
           <AppIcon name="search" :size="14" />
-          <span>جستوجو: &laquo;{{ search.trim() }}&raquo;</span>
+          <span>{{ t('catalog.active.searchChip', { term: searchTerm }) }}</span>
           <AppIcon name="close" :size="12" />
-          <span class="visually-hidden">حذف فیلتر جستوجو</span>
+          <span class="visually-hidden">{{ t('catalog.active.removeSearch') }}</span>
         </button>
       </li>
       <li v-for="category in categories" :key="category">
@@ -49,17 +57,17 @@ const hasAny = computed(() =>
           class="active__chip"
           @click="emit('clear-category', category)"
         >
-          <span>{{ formatCategoryLabel(category) }}</span>
+          <span>{{ categoryLabel(category) }}</span>
           <AppIcon name="close" :size="12" />
           <span class="visually-hidden">
-            حذف فیلتر {{ formatCategoryLabel(category) }}
+            {{ t('catalog.active.removeCategory', { category: categoryLabel(category) }) }}
           </span>
         </button>
       </li>
     </ul>
 
     <button type="button" class="active__clear" @click="emit('clear-all')">
-      پاک کردن همه
+      {{ t('catalog.active.clearAll') }}
     </button>
   </section>
 </template>

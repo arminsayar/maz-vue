@@ -33,3 +33,8 @@ pnpm-debug.log*
 
 # Test & coverage
 coverage
+
+# Local verification logs (mock API / preview servers)
+*.log
+mock-api.log
+prod-*.log

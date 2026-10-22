@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { NuxtError } from '#app'
 
 /**
@@ -7,9 +9,11 @@ import type { NuxtError } from '#app'
  * Renders for unhandled route errors (including 404s that Nuxt cannot match to
  * a page). It deliberately reuses the same EmptyState presentation as the
  * in-page states so error UI is visually consistent everywhere, and offers a
- * single clear recovery action.
+ * single clear recovery action. Copy comes from the `errorPage.*` messages so
+ * the page stays localisable like the rest of the UI.
  */
 const props = defineProps<{ error: NuxtError }>()
+const { t } = useI18n()
 
 const isNotFound = computed(() => props.error?.statusCode === 404)
 
@@ -23,14 +27,14 @@ function goHome(): void {
     <EmptyState
       :icon="isNotFound ? 'search' : 'alert'"
       :tone="isNotFound ? 'neutral' : 'danger'"
-      :title="isNotFound ? 'صفحه پیدا نشد' : 'مشکلی پیش آمد'"
+      :title="isNotFound ? t('errorPage.notFoundTitle') : t('errorPage.genericTitle')"
       :description="
         isNotFound
-          ? 'صفحه‌ای که به دنبالش هستید وجود ندارد یا جابه‌جا شده است.'
-          : 'هنگام نمایش این صفحه خطای پیش‌بینی‌نشده‌ای رخ داد.'
+          ? t('errorPage.notFoundDescription')
+          : t('errorPage.genericDescription')
       "
     >
-      <BaseButton @click="goHome">بازگشت به فروشگاه</BaseButton>
+      <BaseButton @click="goHome">{{ t('errorPage.backToStore') }}</BaseButton>
     </EmptyState>
   </div>
 </template>

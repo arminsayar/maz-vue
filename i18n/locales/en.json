@@ -1,0 +1,174 @@
+{
+  "site": {
+    "title": "{site} — Everyday goods",
+    "description": " is a fast, accessible store for everyday goods — browse the curated catalog, search it, and sort by price or rating."
+  },
+  "common": {
+    "close": "Close",
+    "breadcrumbNav": "Breadcrumb"
+  },
+  "layout": {
+    "skipToContent": "Skip to main content"
+  },
+  "header": {
+    "primaryNav": "Primary navigation",
+    "mobileNav": "Mobile navigation",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
+    "links": {
+      "products": "Product list",
+      "consultation": "Get advice",
+      "faq": "FAQ",
+      "contact": "Contact us"
+    }
+  },
+  "footer": {
+    "nav": "Footer links",
+    "note": "We are here for you seven days a week, from 8am to midnight.",
+    "columns": {
+      "quickAccess": {
+        "title": "Quick access",
+        "about": "About us",
+        "blog": "Blog",
+        "contact": "Contact us",
+        "afterSales": "After-sales service"
+      },
+      "siteGuide": {
+        "title": "Site guide",
+        "terms": "Terms & conditions",
+        "consultation": "Get advice",
+        "feedback": "Feedback & suggestions"
+      }
+    },
+    "social": {
+      "title": "Social media",
+      "onPlatform": "{site} on {platform}"
+    },
+    "badges": {
+      "enamad": "E-namad electronic trust seal",
+      "samandehi": "Samandehi website registration"
+    },
+    "copyright": "All material and moral rights to this website are reserved; any copying will be pursued legally."
+  },
+  "social": {
+    "telegram": "Telegram",
+    "instagram": "Instagram",
+    "twitter": "Twitter",
+    "youtube": "YouTube",
+    "linkedin": "LinkedIn"
+  },
+  "catalog": {
+    "title": "Filters & search",
+    "h1": "Everyday goods",
+    "resultsHeading": "Products",
+    "resultsOne": "{count} product",
+    "resultsMany": "{count} products",
+    "sort": {
+      "title": "Sort"
+    },
+    "sortOptions": {
+      "relevance": "Featured",
+      "price-asc": "Price: low to high",
+      "price-desc": "Price: high to low",
+      "rating-desc": "Rating: high to low",
+      "title-asc": "Name: A to Z"
+    },
+    "categories": {
+      "title": "Category",
+      "filterAria": "Filter by category"
+    },
+    "search": {
+      "submit": "Search",
+      "placeholder": "Search products",
+      "label": "Search products by name",
+      "clear": "Clear search"
+    },
+    "active": {
+      "title": "Active filters",
+      "searchChip": "Search: “{term}”",
+      "removeSearch": "Remove search filter",
+      "removeCategory": "Remove {category} filter",
+      "clearAll": "Clear all"
+    },
+    "empty": {
+      "errorTitle": "The catalog could not be loaded",
+      "errorDescription": "The store is unavailable right now. Please try again shortly.",
+      "emptyTitle": "No products yet",
+      "emptyDescription": "The catalog is currently empty. Please check back soon.",
+      "filteredTitle": "No products match your filters",
+      "filteredDescription": "Try another search term, pick a different category, or clear the filters to see everything."
+    },
+    "actions": {
+      "retry": "Try again",
+      "reload": "Reload",
+      "clearFilters": "Clear all filters"
+    },
+    "seo": {
+      "title": "{site} — Shop everyday goods",
+      "description": "Browse a curated collection of everyday goods — search it, filter by category, and sort by price or rating."
+    }
+  },
+  "product": {
+    "viewDetails": "View details",
+    "untitled": "Unnamed product",
+    "specs": {
+      "title": "Specifications",
+      "price": "Price",
+      "description": "Description",
+      "category": "Category",
+      "rating": "Rating",
+      "count": "Count"
+    },
+    "zoom": {
+      "open": "Enlarge image",
+      "dialog": "Product image, enlarged",
+      "close": "Close enlarged image"
+    },
+    "image": {
+      "unavailable": "Image unavailable",
+      "unavailableAria": "Product image unavailable"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "listing": "Product list"
+    },
+    "related": {
+      "title": "Related products"
+    },
+    "empty": {
+      "errorTitle": "This product could not be loaded",
+      "errorDescription": "Something went wrong. Please try again shortly.",
+      "notFoundTitle": "Product not found",
+      "notFoundDescription": "This product does not exist, or the link you opened is outdated — it has probably been removed from the catalog."
+    },
+    "actions": {
+      "retry": "Try again",
+      "backToStore": "Back to the store",
+      "browseAll": "Browse all products"
+    },
+    "seo": {
+      "titleFallback": "Product",
+      "descriptionFallback": "View the product's details, price and rating."
+    }
+  },
+  "rating": {
+    "accessible": "Rated {rate} out of 5, based on {reviews}",
+    "noRating": "No rating",
+    "noReviews": "No reviews",
+    "oneReview": "{count} review",
+    "reviews": "{count} reviews"
+  },
+  "errors": {
+    "notFound": "What you were looking for was not found.",
+    "server": "The store is having a problem right now.",
+    "request": "Something went wrong while loading the catalog.",
+    "network": "The store could not be reached. Check your connection and try again."
+  },
+  "errorPage": {
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you are looking for does not exist or has moved.",
+    "genericTitle": "Something went wrong",
+    "genericDescription": "An unexpected error occurred while displaying this page.",
+    "backToStore": "Back to the store"
+  }
+}

@@ -4,12 +4,13 @@ import SiteFooter from '~/components/layout/SiteFooter.vue'
 import {
   FOOTER_BADGES,
   FOOTER_COLUMNS,
-  FOOTER_COPYRIGHT,
-  FOOTER_NOTE,
+  FOOTER_SOCIAL_COLUMN,
   SITE_NAME,
+  SOCIAL_LINK_DEFAULTS,
   SOCIAL_LINKS
 } from '~/constants/site'
 import { formatCurrentYear } from '~/utils/format'
+import { t } from '../helpers/i18n'
 
 /**
  * The footer is mounted by the shared layout on every page, so it is the one
@@ -18,6 +19,9 @@ import { formatCurrentYear } from '~/utils/format'
  * the copyright line) and, more importantly, the properties that are invisible
  * in a screenshot: internal links stay client-side, external links are safely
  * targeted, and every icon-only link carries an accessible name.
+ *
+ * Copy is asserted against the same i18n messages the component renders, so
+ * editing the catalogue never invalidates the test.
  */
 const ALL_LINKS = FOOTER_COLUMNS.flatMap((column) => column.links)
 
@@ -29,18 +33,26 @@ describe('SiteFooter', () => {
       .findAll('.footer__heading')
       .map((heading) => heading.text())
 
-    expect(headings).toEqual(FOOTER_COLUMNS.map((column) => column.title))
-    expect(wrapper.findAll('.footer__link').map((link) => link.text())).toEqual(
-      ALL_LINKS.map((link) => link.label)
-    )
+    // The two link columns plus the social column, which is rendered from
+    // `useSocialLinks()` rather than from a static column definition.
+    expect(headings).toEqual([
+      ...FOOTER_COLUMNS.map((column) => t(column.titleKey)),
+      t('footer.social.title')
+    ])
+
+    const linkTexts = wrapper.findAll('.footer__link').map((link) => link.text())
+    expect(linkTexts).toEqual([
+      ...ALL_LINKS.map((link) => t(link.labelKey)),
+      ...FOOTER_SOCIAL_COLUMN.map((icon) => t(`social.${icon}`))
+    ])
   })
 
   it('labels the footer nav landmark and renders the opening-hours note', () => {
     expect(wrapper.element.tagName).toBe('FOOTER')
     expect(wrapper.get('.footer__columns').attributes('aria-label')).toBe(
-      'پیوندهای پاصفحه'
+      t('footer.nav')
     )
-    expect(wrapper.get('.footer__note').text()).toBe(FOOTER_NOTE)
+    expect(wrapper.get('.footer__note').text()).toBe(t('footer.note'))
   })
 
   it('renders internal links as routes and external ones as safe new tabs', () => {
@@ -48,12 +60,15 @@ describe('SiteFooter', () => {
       .findAll('.footer__link')
       .map((link) => link.attributes('href') ?? '')
 
-    expect(hrefs).toEqual(ALL_LINKS.map((link) => link.to))
+    expect(hrefs).toEqual([
+      ...ALL_LINKS.map((link) => link.to),
+      ...FOOTER_SOCIAL_COLUMN.map((icon) => SOCIAL_LINK_DEFAULTS[icon])
+    ])
     expect(hrefs).not.toContain('#')
 
     const external = wrapper.findAll('.footer__link[target="_blank"]')
     expect(external.map((link) => link.attributes('href'))).toEqual(
-      ALL_LINKS.filter((link) => link.to.startsWith('http')).map((link) => link.to)
+      FOOTER_SOCIAL_COLUMN.map((icon) => SOCIAL_LINK_DEFAULTS[icon])
     )
     expect(
       external.every((link) => link.attributes('rel') === 'noopener noreferrer')
@@ -66,7 +81,7 @@ describe('SiteFooter', () => {
 
     expect(accented).toHaveLength(expected.length)
     expect(accented.map((link) => link.text())).toEqual(
-      expected.map((link) => link.label)
+      expected.map((link) => t(link.labelKey))
     )
   })
 
@@ -74,10 +89,15 @@ describe('SiteFooter', () => {
     const links = wrapper.findAll('.footer__social-link')
 
     expect(links.map((link) => link.attributes('href'))).toEqual(
-      SOCIAL_LINKS.map((social) => social.href)
+      SOCIAL_LINKS.map((social) => SOCIAL_LINK_DEFAULTS[social.icon])
     )
     expect(links.map((link) => link.attributes('aria-label'))).toEqual(
-      SOCIAL_LINKS.map((social) => `${SITE_NAME} در ${social.label}`)
+      SOCIAL_LINKS.map((social) =>
+        t('footer.social.onPlatform', {
+          site: SITE_NAME,
+          platform: t(`social.${social.icon}`)
+        })
+      )
     )
     expect(links.every((link) => link.attributes('target') === '_blank')).toBe(true)
     expect(links.every((link) => link.attributes('rel') === 'noopener noreferrer')).toBe(
@@ -100,7 +120,12 @@ describe('SiteFooter', () => {
 
     expect(accented).toHaveLength(expected.length)
     expect(accented.map((link) => link.attributes('aria-label'))).toEqual(
-      expected.map((social) => `${SITE_NAME} در ${social.label}`)
+      expected.map((social) =>
+        t('footer.social.onPlatform', {
+          site: SITE_NAME,
+          platform: t(`social.${social.icon}`)
+        })
+      )
     )
   })
 
@@ -111,7 +136,7 @@ describe('SiteFooter', () => {
       FOOTER_BADGES.map((badge) => badge.href)
     )
     expect(badges.map((badge) => badge.attributes('aria-label'))).toEqual(
-      FOOTER_BADGES.map((badge) => badge.label)
+      FOOTER_BADGES.map((badge) => t(badge.labelKey))
     )
     expect(wrapper.findAll('.footer__badge img').map((img) => img.attributes('src'))).toEqual(
       FOOTER_BADGES.map((badge) => badge.src)
@@ -124,7 +149,7 @@ describe('SiteFooter', () => {
   it('shows the supplied copyright text under a Persian-digit © line', () => {
     const copyright = wrapper.get('.footer__copyright')
 
-    expect(copyright.text()).toContain(FOOTER_COPYRIGHT)
+    expect(copyright.text()).toContain(t('footer.copyright'))
 
     const credit = wrapper.get('.footer__credit').text()
     expect(credit).toContain('©')

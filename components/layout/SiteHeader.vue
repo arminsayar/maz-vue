@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  HEADER_CALL,
-  HEADER_CTA,
-  HEADER_LINKS,
-  HEADER_MENU_LABEL
-} from '~/constants/site'
+import { useI18n } from 'vue-i18n'
+import { HEADER_CALL, HEADER_CTA, HEADER_LINKS } from '~/constants/site'
 
 /**
  * Site header.
@@ -21,30 +17,32 @@ import {
  *     link, so on a phone it dials.
  *
  * Only the background is full-bleed; the content stays on the page's `container`
- * grid so the header lines up with the catalog below it.
+ * grid so the header lines up with the catalog below it. Link labels resolve
+ * through i18n (`header.links.*`) so the structure stays locale-independent.
  */
+const { t } = useI18n()
 const menuOpen = ref(false)
 </script>
 
 <template>
   <header class="header">
     <div class="container header__inner">
-      <nav class="header__nav" aria-label="ناوبری اصلی">
+      <nav class="header__nav" :aria-label="t('header.primaryNav')">
         <NuxtLink
           v-for="link in HEADER_LINKS"
-          :key="link.label"
+          :key="link.labelKey"
           class="header__link"
           :class="{ 'header__link--accent': link.accent }"
           :to="link.to"
         >
           <AppIcon :name="link.icon" :size="16" />
-          <span>{{ link.label }}</span>
+          <span>{{ t(link.labelKey) }}</span>
         </NuxtLink>
       </nav>
 
       <NuxtLink class="header__cta" :to="HEADER_CTA.to">
         <AppIcon :name="HEADER_CTA.icon" :size="16" />
-        <span>{{ HEADER_CTA.label }}</span>
+        <span>{{ t(HEADER_CTA.labelKey) }}</span>
       </NuxtLink>
 
       <!--
@@ -56,7 +54,7 @@ const menuOpen = ref(false)
         <button
           type="button"
           class="header__icon-btn"
-          :aria-label="HEADER_MENU_LABEL"
+          :aria-label="t('header.menu')"
           :aria-expanded="menuOpen"
           @click="menuOpen = true"
         >
@@ -66,7 +64,7 @@ const menuOpen = ref(false)
         <a
           class="header__icon-btn"
           :href="HEADER_CALL.href"
-          :aria-label="HEADER_CALL.label"
+          :aria-label="t(HEADER_CALL.labelKey)"
         >
           <AppIcon name="phone" :size="20" />
         </a>
@@ -75,28 +73,28 @@ const menuOpen = ref(false)
 
     <AppDrawer
       :open="menuOpen"
-      :title="HEADER_MENU_LABEL"
-      close-label="بستن منو"
+      :title="t('header.menu')"
+      :close-label="t('header.closeMenu')"
       @close="menuOpen = false"
     >
-      <nav class="menu" aria-label="ناوبری موبایل">
+      <nav class="menu" :aria-label="t('header.mobileNav')">
         <NuxtLink
           v-for="link in HEADER_LINKS"
-          :key="link.label"
+          :key="link.labelKey"
           class="menu__link"
           :class="{ 'menu__link--accent': link.accent }"
           :to="link.to"
           @click="menuOpen = false"
         >
           <AppIcon :name="link.icon" :size="18" />
-          <span>{{ link.label }}</span>
+          <span>{{ t(link.labelKey) }}</span>
         </NuxtLink>
       </nav>
 
       <template #footer>
         <NuxtLink class="menu__cta" :to="HEADER_CTA.to" @click="menuOpen = false">
           <AppIcon :name="HEADER_CTA.icon" :size="16" />
-          <span>{{ HEADER_CTA.label }}</span>
+          <span>{{ t(HEADER_CTA.labelKey) }}</span>
         </NuxtLink>
       </template>
     </AppDrawer>

@@ -2,21 +2,23 @@ import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SortFilter from '~/components/catalog/SortFilter.vue'
 import { SORT_OPTIONS } from '~/constants/catalog'
+import { t } from '../helpers/i18n'
 
 /**
  * The sort control is a radio group (the design shows the options inline rather
  * than behind a dropdown), so it must render one radio per sort key, reflect the
- * current value, and reject anything the switch does not emit.
+ * current value, and reject anything the switch does not emit. Labels resolve
+ * through the shared i18n messages, mirroring the component itself.
  */
 describe('SortFilter', () => {
   it('renders the options as a labelled radio group', () => {
     const wrapper = mount(SortFilter, { props: { modelValue: 'relevance' } })
 
     expect(wrapper.get('.sort').attributes('role')).toBe('radiogroup')
-    expect(wrapper.get('.sort').attributes('aria-label')).toBe('مرتبسازی')
+    expect(wrapper.get('.sort').attributes('aria-label')).toBe(t('catalog.sort.title'))
     expect(wrapper.findAll('input[type="radio"]')).toHaveLength(SORT_OPTIONS.length)
     expect(wrapper.findAll('.sort__label').map((label) => label.text())).toEqual(
-      SORT_OPTIONS.map((option) => option.label)
+      SORT_OPTIONS.map((option) => t(option.labelKey))
     )
   })
 

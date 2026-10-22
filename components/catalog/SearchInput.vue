@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { SEARCH_DEBOUNCE_MS } from '~/constants/catalog'
 
 /**
@@ -12,28 +13,27 @@ import { SEARCH_DEBOUNCE_MS } from '~/constants/catalog'
  * re-emitting, so there is no feedback loop.
  *
  * Enter and the optional submit button flush immediately, so an intentional
- * search never waits out the debounce. Passing `submitLabel` renders the
- * design's full-width «جستجو» button below the field; without it the component
- * is just the field, for contexts that want the control on its own.
+ * search never waits out the debounce. Passing `submit` renders the design's
+ * full-width «جستجو» button below the field; without it the component is just
+ * the field, for contexts that want the control on its own. All copy
+ * (placeholder, label, clear, submit) resolves from the `catalog.search.*`
+ * messages, so the component is fully locale-aware.
  */
 const props = withDefaults(
   defineProps<{
     modelValue: string
-    placeholder?: string
     id?: string
-    submitLabel?: string
+    submit?: boolean
   }>(),
-  {
-    placeholder: 'جستوجو در محصولات',
-    id: 'catalog-search',
-    submitLabel: undefined
-  }
+  { id: 'catalog-search', submit: false }
 )
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   submit: [value: string]
 }>()
+
+const { t } = useI18n()
 
 const text = ref(props.modelValue)
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -86,9 +86,9 @@ onBeforeUnmount(cancelPending)
 </script>
 
 <template>
-  <div class="search" :class="{ 'search--stacked': submitLabel }">
+  <div class="search" :class="{ 'search--stacked': submit }">
     <div class="search__field">
-      <label class="visually-hidden" :for="id">جستوجوی محصولات بر پایهٔ نام</label>
+      <label class="visually-hidden" :for="id">{{ t('catalog.search.label') }}</label>
       <span class="search__icon" aria-hidden="true">
         <AppIcon name="search" :size="18" />
       </span>
@@ -99,7 +99,7 @@ onBeforeUnmount(cancelPending)
         type="search"
         autocomplete="off"
         enterkeyhint="search"
-        :placeholder="placeholder"
+        :placeholder="t('catalog.search.placeholder')"
         :value="text"
         @input="onInput"
         @keydown="onKeydown"
@@ -112,12 +112,12 @@ onBeforeUnmount(cancelPending)
         @click="onClear"
       >
         <AppIcon name="close" :size="15" />
-        <span class="visually-hidden">پاک کردن جستوجو</span>
+        <span class="visually-hidden">{{ t('catalog.search.clear') }}</span>
       </button>
     </div>
 
-    <button v-if="submitLabel" type="button" class="search__submit" @click="onSubmit">
-      {{ submitLabel }}
+    <button v-if="submit" type="button" class="search__submit" @click="onSubmit">
+      {{ t('catalog.search.submit') }}
     </button>
   </div>
 </template>

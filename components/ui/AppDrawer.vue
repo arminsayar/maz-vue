@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 /**
  * Accessible slide-over.
@@ -15,9 +16,13 @@ import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
  */
 const props = withDefaults(
   defineProps<{ open: boolean; title: string; closeLabel?: string }>(),
-  { closeLabel: 'بستن' }
+  { closeLabel: undefined }
 )
 const emit = defineEmits<{ close: [] }>()
+
+const { t } = useI18n()
+
+const closeText = computed(() => props.closeLabel ?? t('common.close'))
 
 const panel = ref<HTMLElement | null>(null)
 let previouslyFocused: HTMLElement | null = null
@@ -98,7 +103,7 @@ onBeforeUnmount(() => {
           <button
             type="button"
             class="drawer__close"
-            :aria-label="closeLabel"
+            :aria-label="closeText"
             @click="emit('close')"
           >
             <AppIcon name="close" :size="20" />

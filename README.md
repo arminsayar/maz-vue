@@ -1,10 +1,7 @@
 # maz-vue
 
-## Aurora — product browsing storefront
-
 A **Persian-first (RTL)** product browsing experience (listing + detail) built
-with **Nuxt 3 / Vue 3 / TypeScript** against the public
-[Fake Store API](https://fakestoreapi.com).
+with **Nuxt 3 / Vue 3 / TypeScript** against a public product API (Fake Store).
 
 The app is server-rendered, keyboard- and screen-reader-friendly, resilient to
 malformed API payloads, and covered by unit + component tests.
@@ -99,7 +96,7 @@ compact bottom bar, so nothing collides at 320px.
 
 **Accessibility** — the footer is a `<footer>` (contentinfo) landmark, the link
 columns are a labelled `<nav>`, the icon-only social links carry a text
-alternative (`Aurora در تلگرام`) plus `rel="noopener noreferrer"`, the badge
+alternative (` در تلگرام`) plus `rel="noopener noreferrer"`, the badge
 images are decorative (`alt=""`) because their anchor already carries the name,
 and the copyright year is the *Persian* (Solar Hijri) year in Persian digits.
 
@@ -121,6 +118,7 @@ Requires Node.js 20+ (developed on Node 24).
 
 ```bash
 npm install       # installs deps and runs `nuxt prepare`
+cp .env.example .env   # set the API base URL (and any social overrides)
 npm run dev       # http://localhost:3000
 ```
 
@@ -136,13 +134,36 @@ npm run dev       # http://localhost:3000
 | `npm run test:watch` | Vitest in watch mode                           |
 | `npm run typecheck`  | `nuxt typecheck` (vue-tsc, strict)             |
 | `npm run lint`       | ESLint over the project                        |
+| `npm run i18n:check` | Verify the `fa`/`en` catalogues are in sync    |
 
-The API base URL is read from Nuxt runtime config and can be pointed elsewhere
-without code changes:
+The API base URL is **configuration, not code**: it is read from the
+`NUXT_PUBLIC_API_BASE` environment variable (see `.env.example`) and surfaced
+through Nuxt's runtime config. No host is hard-coded in the source, so the same
+build can be pointed at a different backend — or a local mock — without a code
+change:
 
 ```bash
-NUXT_PUBLIC_API_BASE=https://fakestoreapi.com npm run dev
+# .env
+NUXT_PUBLIC_API_BASE=https://your-api-host.example
 ```
+
+If the variable is missing the app fails loudly on the first request, naming
+the variable to set, rather than silently calling the wrong host.
+
+A tiny stand-in API ships in `scripts/mock-api.mjs` for working offline:
+
+```bash
+node scripts/mock-api.mjs                       # listens on :4100
+NUXT_PUBLIC_API_BASE=http://127.0.0.1:4100 npm run dev
+```
+
+### Localisation checks
+
+`npm run i18n:check` compares the `fa` and `en` catalogues: both must define
+exactly the same key set, every key referenced from the source must exist, and
+no key may be left orphaned. It understands the three ways a key reaches the
+translator — a literal `t('…')` call, a `labelKey`/`titleKey` constant, and a
+template literal that resolves a whole namespace (`t(\`social.${icon}\`)`).
 
 ## Assumptions
 
@@ -158,7 +179,7 @@ NUXT_PUBLIC_API_BASE=https://fakestoreapi.com npm run dev
 - **Currency** — prices come from the Fake Store API in USD and are deliberately
   *not* converted. They are only presented in Persian, so the figures stay
   truthful to the source data.
-- **Brand name** — "Aurora" is left as-is (Latin) since brand names are not
+- **Brand name** — "Brand" is left as-is (Latin) since brand names are not
   normally transliterated; all surrounding UI copy is Persian.
 - **Footer copy** — the supplied footer spec carries untranslated Figma
   placeholders: `فروشگاه` twice in the first column, `ثبت نام` three times in the

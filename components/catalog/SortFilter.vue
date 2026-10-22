@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import type { SortKey } from '~/types/catalog'
 import { SORT_OPTIONS } from '~/constants/catalog'
 
@@ -13,11 +14,14 @@ import { SORT_OPTIONS } from '~/constants/catalog'
  * The incoming value is validated against the known sort keys instead of being
  * cast, so a hand-edited URL can never produce an unsupported sort. The control
  * is not repeated anywhere else in the tree, so a fixed radio `name` is enough
- * to keep the group exclusive.
+ * to keep the group exclusive. Option labels resolve from the
+ * `catalog.sortOptions.*` messages via each option's `labelKey`.
  */
 defineProps<{ modelValue: SortKey }>()
 
 const emit = defineEmits<{ 'update:modelValue': [value: SortKey] }>()
+
+const { t } = useI18n()
 
 function onChange(event: Event): void {
   const raw = (event.target as HTMLInputElement).value
@@ -27,7 +31,7 @@ function onChange(event: Event): void {
 </script>
 
 <template>
-  <div class="sort" role="radiogroup" aria-label="مرتبسازی">
+  <div class="sort" role="radiogroup" :aria-label="t('catalog.sort.title')">
     <label
       v-for="option in SORT_OPTIONS"
       :key="option.value"
@@ -42,7 +46,7 @@ function onChange(event: Event): void {
         :checked="option.value === modelValue"
         @change="onChange"
       >
-      <span class="sort__label">{{ option.label }}</span>
+      <span class="sort__label">{{ t(option.labelKey) }}</span>
     </label>
   </div>
 </template>

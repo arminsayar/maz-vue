@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { applyCatalogFilters } from '~/utils/catalog'
 import { fetchCategories, fetchProducts } from '~/services/products'
 import { SITE_NAME } from '~/constants/site'
@@ -22,6 +23,7 @@ import { SITE_NAME } from '~/constants/site'
  * on smaller screens. The page owns that grid — `CatalogToolbar` is only the
  * controls, and the active-filter card sits directly above the grid.
  */
+const { t, te } = useI18n()
 
 const { data: products, status, error, refresh } = await useAsyncData(
   'catalog-products',
@@ -72,10 +74,20 @@ const isFilteredEmpty = computed(
     filtered.value.length === 0
 )
 
+/**
+ * The API client reports failures as `errors.*` i18n keys, so translating the
+ * message gives the visitor the precise reason. Anything else (an unexpected,
+ * non-localised error) falls back to the generic copy rather than leaking a raw
+ * message into the page.
+ */
+const errorDescription = computed(() => {
+  const key = error.value?.message
+  return key && te(key) ? t(key) : t('catalog.empty.errorDescription')
+})
+
 useSeoMeta({
-  title: `${SITE_NAME} — خرید کالاهای روزمره`,
-  description:
-    'مجموعهای از کالاهای روزمره را مرور کنید؛ جستوجو کنید، بر پایهٔ دستهبندی فیلتر کنید و بر پایهٔ قیمت یا امتیاز مرتب کنید.'
+  title: () => t('catalog.seo.title', { site: SITE_NAME }),
+  description: () => t('catalog.seo.description')
 })
 </script>
 
@@ -83,7 +95,7 @@ useSeoMeta({
   <div class="listing container">
     <!-- The design opens straight on the filters and the grid, so the page's
          single h1 is present for assistive tech without occupying a hero band. -->
-    <h1 class="visually-hidden">کالاهای روزمره</h1>
+    <h1 class="visually-hidden">{{ t('catalog.h1') }}</h1>
 
     <div class="catalog">
       <CatalogToolbar
@@ -98,7 +110,7 @@ useSeoMeta({
       />
 
       <section class="results" aria-live="polite" :aria-busy="isLoading">
-        <h2 class="visually-hidden">محصولات</h2>
+        <h2 class="visually-hidden">{{ t('catalog.resultsHeading') }}</h2>
 
         <!-- The card the design puts on top of the grid: every applied filter,
              each removable on its own. -->
@@ -118,31 +130,32 @@ useSeoMeta({
           v-else-if="hasError"
           icon="alert"
           tone="danger"
-          title="بارگذاری کاتالوگ ممکن نشد"
-          :description="
-            error?.message ||
-            'فروشگاه در این لحظه در دسترس نیست. لطفاً کمی بعد دوباره تلاش کنید.'
-          "
+          :title="t('catalog.empty.errorTitle')"
+          :description="errorDescription"
         >
-          <BaseButton :loading="isLoading" @click="refresh()">تلاش دوباره</BaseButton>
+          <BaseButton :loading="isLoading" @click="refresh()">
+            {{ t('catalog.actions.retry') }}
+          </BaseButton>
         </EmptyState>
 
         <EmptyState
           v-else-if="isCatalogEmpty"
           icon="package"
-          title="هنوز محصولی ثبت نشده است"
-          description="کاتالوگ در حال حاضر خالی است. لطفاً کمی بعد سر بزنید."
+          :title="t('catalog.empty.emptyTitle')"
+          :description="t('catalog.empty.emptyDescription')"
         >
-          <BaseButton variant="secondary" @click="refresh()">بارگذاری دوباره</BaseButton>
+          <BaseButton variant="secondary" @click="refresh()">
+            {{ t('catalog.actions.reload') }}
+          </BaseButton>
         </EmptyState>
 
         <EmptyState
           v-else-if="isFilteredEmpty"
           icon="search"
-          title="هیچ محصولی با فیلترهای شما همخوانی ندارد"
-          description="عبارت جستوجوی دیگری بنویسید، دستهٔ دیگری انتخاب کنید یا فیلترها را پاک کنید تا همهچیز نمایش داده شود."
+          :title="t('catalog.empty.filteredTitle')"
+          :description="t('catalog.empty.filteredDescription')"
         >
-          <BaseButton @click="clearAll">پاک کردن همهٔ فیلترها</BaseButton>
+          <BaseButton @click="clearAll">{{ t('catalog.actions.clearFilters') }}</BaseButton>
         </EmptyState>
 
         <ProductGrid v-else :products="filtered" />

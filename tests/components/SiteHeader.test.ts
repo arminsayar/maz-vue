@@ -1,12 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import SiteHeader from '~/components/layout/SiteHeader.vue'
-import {
-  HEADER_CALL,
-  HEADER_CTA,
-  HEADER_LINKS,
-  HEADER_MENU_LABEL
-} from '~/constants/site'
+import { HEADER_CALL, HEADER_CTA, HEADER_LINKS } from '~/constants/site'
+import { t } from '../helpers/i18n'
 
 /**
  * The header is mounted by the shared layout on every page, so a regression here
@@ -15,6 +11,10 @@ import {
  * mobile hamburger + call pair — and the two properties a screenshot cannot
  * show: every link resolves somewhere real, and the mobile menu exposes the very
  * same links as the desktop row.
+ *
+ * Labels are asserted against the same i18n messages the components render
+ * (`header.links.*`), so the test stays correct if copy is edited in the
+ * catalogue rather than in this file.
  */
 afterEach(() => {
   document.body.innerHTML = ''
@@ -26,9 +26,11 @@ describe('SiteHeader', () => {
 
   it('renders the labelled desktop quick-link nav with one item per design link', () => {
     expect(wrapper.element.tagName).toBe('HEADER')
-    expect(wrapper.get('.header__nav').attributes('aria-label')).toBe('ناوبری اصلی')
+    expect(wrapper.get('.header__nav').attributes('aria-label')).toBe(
+      t('header.primaryNav')
+    )
     expect(wrapper.findAll('.header__link').map((link) => link.text())).toEqual(
-      HEADER_LINKS.map((link) => link.label)
+      HEADER_LINKS.map((link) => t(link.labelKey))
     )
   })
 
@@ -52,14 +54,14 @@ describe('SiteHeader', () => {
 
     expect(accented).toHaveLength(expected.length)
     expect(accented.map((link) => link.text())).toEqual(
-      expected.map((link) => link.label)
+      expected.map((link) => t(link.labelKey))
     )
   })
 
   it('renders the desktop contact button from the CTA spec', () => {
     const cta = wrapper.get('.header__cta')
 
-    expect(cta.text()).toBe(HEADER_CTA.label)
+    expect(cta.text()).toBe(t(HEADER_CTA.labelKey))
     expect(cta.attributes('href')).toBe(HEADER_CTA.to)
   })
 
@@ -71,13 +73,13 @@ describe('SiteHeader', () => {
     expect(controls).toHaveLength(2)
     // The menu button is first so that, in RTL, it lands at the inline start
     // (the right) and the call button at the inline end — the design's order.
-    expect(menuButton.attributes('aria-label')).toBe(HEADER_MENU_LABEL)
+    expect(menuButton.attributes('aria-label')).toBe(t('header.menu'))
     expect(menuButton.attributes('aria-expanded')).toBe('false')
 
     const call = compact.get('a')
     expect(call.attributes('href')).toBe(HEADER_CALL.href)
     expect(call.attributes('href')).toMatch(/^tel:/)
-    expect(call.attributes('aria-label')).toBe(HEADER_CALL.label)
+    expect(call.attributes('aria-label')).toBe(t(HEADER_CALL.labelKey))
   })
 
   it('opens a drawer holding the same links when the menu button is pressed', async () => {
@@ -89,7 +91,7 @@ describe('SiteHeader', () => {
 
     const menuLinks = document.querySelectorAll<HTMLAnchorElement>('.menu__link')
     expect(Array.from(menuLinks).map((link) => link.textContent)).toEqual(
-      HEADER_LINKS.map((link) => link.label)
+      HEADER_LINKS.map((link) => t(link.labelKey))
     )
     expect(Array.from(menuLinks).map((link) => link.getAttribute('href'))).toEqual(
       HEADER_LINKS.map((link) => link.to)

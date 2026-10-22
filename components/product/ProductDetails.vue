@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Product } from '~/types/product'
-import { formatCategoryLabel, formatInteger, formatPrice } from '~/utils/format'
+import { useFormatters } from '~/composables/useFormatters'
 
 /**
  * Presentational product detail block — the design's two stacked cards.
@@ -13,11 +14,17 @@ import { formatCategoryLabel, formatInteger, formatPrice } from '~/utils/format'
  *
  * Extracted from the route so the presentation is independently testable and the
  * page stays responsible only for fetching and state selection (loading / error /
- * not-found / loaded). The component is purely a function of its `product` prop.
+ * not-found / loaded). The component is purely a function of its `product` prop;
+ * labels and number formats resolve through i18n and the locale-aware
+ * `useFormatters`, so both follow the active locale.
  */
 const props = defineProps<{ product: Product }>()
 
-const categoryLabel = computed(() => formatCategoryLabel(props.product.category))
+const { t } = useI18n()
+const { price, integer, categoryLabel } = useFormatters()
+
+const title = computed(() => props.product.title || t('product.untitled'))
+const category = computed(() => categoryLabel(props.product.category))
 
 /**
  * The description arrives as running prose; the design lists it as bullets, so
@@ -72,12 +79,12 @@ onBeforeUnmount(() => {
   <article class="pdp">
     <!-- Hero: title + image + zoom -->
     <section class="pdp__card">
-      <h1 class="pdp__title">{{ product.title }}</h1>
+      <h1 class="pdp__title">{{ title }}</h1>
 
       <figure class="pdp__media">
         <ProductImage
           :src="product.image"
-          :alt="product.title"
+          :alt="title"
           ratio="16/9"
           eager
           sizes="(min-width: 900px) 70vw, 100vw"
@@ -91,25 +98,27 @@ onBeforeUnmount(() => {
           @click="openZoom"
         >
           <AppIcon name="zoom-in" :size="18" />
-          <span class="visually-hidden">بزرگنمایی تصویر</span>
+          <span class="visually-hidden">{{ t('product.zoom.open') }}</span>
         </button>
       </figure>
     </section>
 
     <!-- Spec sheet -->
     <section class="pdp__card" aria-labelledby="product-spec-heading">
-      <h2 id="product-spec-heading" class="pdp__heading">مشخصات فنی</h2>
+      <h2 id="product-spec-heading" class="pdp__heading">
+        {{ t('product.specs.title') }}
+      </h2>
 
       <dl class="spec">
         <div class="spec__row">
-          <dt class="spec__term">قیمت</dt>
+          <dt class="spec__term">{{ t('product.specs.price') }}</dt>
           <dd class="spec__value spec__value--price">
-            {{ formatPrice(product.price) }}
+            {{ price(product.price) }}
           </dd>
         </div>
 
         <div class="spec__row">
-          <dt class="spec__term">توضیحات</dt>
+          <dt class="spec__term">{{ t('product.specs.description') }}</dt>
           <dd class="spec__value">
             <ul v-if="points.length" class="spec__points">
               <li v-for="(point, index) in points" :key="index">{{ point }}</li>
@@ -119,27 +128,27 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="spec__row">
-          <dt class="spec__term">دسته بندی</dt>
+          <dt class="spec__term">{{ t('product.specs.category') }}</dt>
           <dd class="spec__value">
             <NuxtLink
               class="spec__link"
               :to="{ path: '/', query: { category: product.category } }"
             >
-              {{ categoryLabel }}
+              {{ category }}
             </NuxtLink>
           </dd>
         </div>
 
         <div class="spec__row">
-          <dt class="spec__term">رتبه</dt>
+          <dt class="spec__term">{{ t('product.specs.rating') }}</dt>
           <dd class="spec__value">
             <StarRating :rate="product.rating.rate" :count="product.rating.count" />
           </dd>
         </div>
 
         <div class="spec__row">
-          <dt class="spec__term">تعداد</dt>
-          <dd class="spec__value">{{ formatInteger(product.rating.count) }}</dd>
+          <dt class="spec__term">{{ t('product.specs.count') }}</dt>
+          <dd class="spec__value">{{ integer(product.rating.count) }}</dd>
         </div>
       </dl>
     </section>
@@ -150,7 +159,7 @@ onBeforeUnmount(() => {
       class="zoom"
       role="dialog"
       aria-modal="true"
-      aria-label="تصویر بزرگ محصول"
+      :aria-label="t('product.zoom.dialog')"
       @click.self="zoomed = false"
     >
       <button
@@ -160,13 +169,13 @@ onBeforeUnmount(() => {
         @click="zoomed = false"
       >
         <AppIcon name="close" :size="22" />
-        <span class="visually-hidden">بستن تصویر بزرگ</span>
+        <span class="visually-hidden">{{ t('product.zoom.close') }}</span>
       </button>
 
       <img
         class="zoom__img"
         :src="product.image"
-        :alt="product.title"
+        :alt="title"
         @click.stop
       >
     </div>

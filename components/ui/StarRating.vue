@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatRating, formatReviewCount } from '~/utils/format'
-import { NO_RATING_LABEL } from '~/constants/catalog'
+import { useI18n } from 'vue-i18n'
+import { useFormatters } from '~/composables/useFormatters'
 
 /**
  * Star rating.
@@ -9,6 +9,10 @@ import { NO_RATING_LABEL } from '~/constants/catalog'
  * Stars are purely decorative; the exact value and review count are exposed on
  * the wrapper via `role="img"` + `aria-label`, so screen-reader users get the
  * precise figure rather than having to infer it from the number of stars.
+ *
+ * The review count uses the message pair (no/one/many) with the count already
+ * formatted in locale digits, rather than vue-i18n's numeric pluralisation,
+ * because a pre-formatted Persian-digit string can no longer drive the latter.
  */
 const props = withDefaults(
   defineProps<{
@@ -20,6 +24,9 @@ const props = withDefaults(
   { count: 0, showMeta: true, size: 'sm' }
 )
 
+const { t } = useI18n()
+const { rating, integer } = useFormatters()
+
 const clamped = computed(() => Math.max(0, Math.min(5, props.rate || 0)))
 
 const stars = computed(() =>
@@ -29,12 +36,19 @@ const stars = computed(() =>
   }))
 )
 
-const reviewLabel = computed(() => formatReviewCount(props.count ?? 0))
+const reviewCount = computed(() => props.count ?? 0)
+
+const reviewLabel = computed(() => {
+  const count = reviewCount.value
+  if (count === 0) return t('rating.noReviews')
+  if (count === 1) return t('rating.oneReview', { count: integer(count) })
+  return t('rating.reviews', { count: integer(count) })
+})
 
 const accessibleLabel = computed(() =>
   props.rate > 0
-    ? `امتیاز ${formatRating(props.rate)} از ۵ بر پایهٔ ${reviewLabel.value}`
-    : NO_RATING_LABEL
+    ? t('rating.accessible', { rate: rating(props.rate), reviews: reviewLabel.value })
+    : t('rating.noRating')
 )
 </script>
 
@@ -51,7 +65,7 @@ const accessibleLabel = computed(() =>
       </span>
     </span>
     <span v-if="showMeta" class="rating__meta">
-      <span class="rating__value">{{ formatRating(rate) }}</span>
+      <span class="rating__value">{{ rating(rate) }}</span>
       <span class="rating__count">{{ reviewLabel }}</span>
     </span>
   </div>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 /**
  * Default layout: skip link, header, routed content, footer.
  *
@@ -6,11 +8,12 @@
  * A single <main> landmark wraps the routed page, so pages themselves never
  * need to declare one.
  */
+const { t } = useI18n()
 </script>
 
 <template>
   <div class="layout">
-    <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
+    <a class="skip-link" href="#main">{{ t('layout.skipToContent') }}</a>
     <SiteHeader />
     <main id="main" class="layout__main">
       <slot />

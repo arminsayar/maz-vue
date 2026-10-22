@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 /**
  * Breadcrumb trail.
  *
@@ -20,10 +22,12 @@ export interface BreadcrumbItem {
 }
 
 defineProps<{ items: ReadonlyArray<BreadcrumbItem> }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
-  <nav class="crumbs" aria-label="مسیر صفحه">
+  <nav class="crumbs" :aria-label="t('common.breadcrumbNav')">
     <ol class="crumbs__list">
       <li
         v-for="(item, index) in items"

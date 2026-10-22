@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Product } from '~/types/product'
 
 /**
@@ -14,10 +15,15 @@ import type { Product } from '~/types/product'
  * repeating it in the alt text would double-announce for screen-reader users.
  * The action is a styled span, not a nested link: an anchor inside an anchor is
  * invalid HTML, and the card's own link already carries the destination.
+ * A product normalised with no usable title falls back to the
+ * `product.untitled` message rather than rendering an empty heading.
  */
 const props = defineProps<{ product: Product; eager?: boolean }>()
 
+const { t } = useI18n()
+
 const href = computed(() => `/products/${props.product.id}`)
+const title = computed(() => props.product.title || t('product.untitled'))
 </script>
 
 <template>
@@ -28,12 +34,12 @@ const href = computed(() => `/products/${props.product.id}`)
       </div>
 
       <div class="card__body">
-        <h3 class="card__title">{{ product.title }}</h3>
+        <h3 class="card__title">{{ title }}</h3>
 
         <span class="card__cta" aria-hidden="true">
           <!-- RTL: "forward" points left, so the chevron is mirrored. -->
           <AppIcon name="chevron-left" :size="15" />
-          مشاهده جزئیات
+          {{ t('product.viewDetails') }}
         </span>
       </div>
     </NuxtLink>

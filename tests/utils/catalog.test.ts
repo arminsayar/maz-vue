@@ -8,6 +8,7 @@ import {
   matchesSearch,
   parseCatalogFilters
 } from '~/utils/catalog'
+import type { CatalogFilters } from '~/types/catalog'
 import { SORT_OPTIONS } from '~/constants/catalog'
 import { makeProduct, makeProducts } from '../helpers/factory'
 
@@ -227,7 +228,7 @@ describe('buildCatalogQuery', () => {
       search: 'ring',
       categories: ['jewelery', 'electronics'],
       sort: 'price-desc'
-    } as const
+    } satisfies CatalogFilters
     expect(parseCatalogFilters(buildCatalogQuery(filters), VALID_SORTS)).toEqual(
       filters
     )

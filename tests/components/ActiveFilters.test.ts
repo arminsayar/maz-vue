@@ -21,7 +21,7 @@ describe('ActiveFilters', () => {
       props: { search: '  jacket ', categories: [] }
     })
 
-    expect(wrapper.get('.active__chip').text()).toContain('جستوجو: «jacket»')
+    expect(wrapper.get('.active__chip').text()).toContain('جستجو: «jacket»')
     expect(wrapper.get('.active__clear').text()).toBe('پاک کردن همه')
   })
 

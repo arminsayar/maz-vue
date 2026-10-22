@@ -35,7 +35,9 @@ export function normaliseProduct(value: unknown): Product | null {
 
   return {
     id,
-    title: asString(value.title, 'محصول بدون نام'),
+    // An empty title is translated at the render site (`product.untitled`);
+    // the service layer stays locale-free.
+    title: asString(value.title),
     price: asNumber(value.price, 0),
     description: asString(value.description),
     category: asString(value.category, 'uncategorised'),

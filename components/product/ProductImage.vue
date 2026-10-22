@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 /**
  * Product image with a fixed aspect ratio, lazy loading and an error fallback.
  *
  * Centralising this means the card and the detail gallery share identical
  * sizing/loading behaviour, and neither re-implements broken-image handling.
- * Aspect ratio is set via CSS so space is reserved before load (no layout shift).
+ * Aspect ratio is set via CSS so space is reserved before load (no layout shift),
+ * and the fallback copy comes from the `product.image.*` messages so it follows
+ * the active locale.
  */
 const props = withDefaults(
   defineProps<{
@@ -18,6 +21,8 @@ const props = withDefaults(
   }>(),
   { ratio: '4/3', eager: false, sizes: undefined }
 )
+
+const { t } = useI18n()
 
 const failed = ref(false)
 
@@ -43,9 +48,14 @@ watch(
       decoding="async"
       @error="failed = true"
     >
-    <div v-else class="pimage__fallback" role="img" :aria-label="alt || 'تصویر محصول در دسترس نیست'">
+    <div
+      v-else
+      class="pimage__fallback"
+      role="img"
+      :aria-label="alt || t('product.image.unavailableAria')"
+    >
       <AppIcon name="package" :size="30" />
-      <span class="pimage__fallback-text">تصویر در دسترس نیست</span>
+      <span class="pimage__fallback-text">{{ t('product.image.unavailable') }}</span>
     </div>
   </div>
 </template>

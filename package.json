@@ -12,12 +12,15 @@
         "postinstall": "nuxt prepare",
         "typecheck": "nuxt typecheck",
         "lint": "eslint .",
+        "i18n:check": "node scripts/check-i18n.mjs",
         "test": "vitest run",
         "test:watch": "vitest"
     },
     "dependencies": {
+        "@nuxtjs/i18n": "^9.5.6",
         "nuxt": "^3.21.11",
         "vue": "^3.5.13",
+        "vue-i18n": "^10.0.8",
         "vue-router": "^4.5.0"
     },
     "devDependencies": {

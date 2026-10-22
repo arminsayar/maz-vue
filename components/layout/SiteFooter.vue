@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import {
   FOOTER_BADGES,
   FOOTER_COLUMNS,
-  FOOTER_COPYRIGHT,
-  FOOTER_NOTE,
-  SITE_NAME,
-  SOCIAL_LINKS
+  FOOTER_SOCIAL_COLUMN,
+  SITE_NAME
 } from '~/constants/site'
-import { formatCurrentYear } from '~/utils/format'
+import { useFormatters } from '~/composables/useFormatters'
+import { useSocialLinks } from '~/composables/useSocialLinks'
 
 /**
  * Site footer.
@@ -16,18 +16,26 @@ import { formatCurrentYear } from '~/utils/format'
  * a single page having to opt in.
  *
  * Structure follows the design: a white main band holding three link sections
- * with the opening-hours note at the opposite end, then a bar with the trust
- * badges at one end and the copyright line above the social row at the other.
- * All directional CSS uses logical properties, so the whole footer mirrors with
- * the document's `dir="rtl"` — the note lands on the right and the badges on the
+ * (quick access, site guide, social networks) with the opening-hours note at the
+ * opposite end, then a bar with the trust badges at one end and the copyright
+ * line above the social badge row at the other. All labels resolve through i18n,
+ * and every URL that can differ per environment comes from runtime config.
+ * Directional CSS uses logical properties, so the whole footer mirrors with the
+ * document's `dir="rtl"` — the note lands on the right and the badges on the
  * left without a single physical `left`/`right`.
  */
-const year = formatCurrentYear()
+const { t } = useI18n()
+const { currentYear } = useFormatters()
 
-/** Footer links are either internal routes or absolute external URLs. */
-function isExternal(to: string): boolean {
-  return /^https?:/i.test(to)
-}
+const year = currentYear()
+
+/** The full badge row (five brands) from `useSocialLinks`. */
+const socialLinks = useSocialLinks()
+
+/** The subset the design lists in the «شبکههای اجتماعی» column. */
+const socialColumn = socialLinks.filter((social) =>
+  FOOTER_SOCIAL_COLUMN.includes(social.icon)
+)
 </script>
 
 <template>
@@ -36,43 +44,48 @@ function isExternal(to: string): boolean {
       <div class="container footer__inner">
         <!--
           DOM order is RTL reading order: the note occupies the inline start
-          (right), the three link sections fill the rest of the row.
+          (the right), the three link sections fill the rest of the row.
         -->
-        <p class="footer__note">{{ FOOTER_NOTE }}</p>
+        <p class="footer__note">{{ t('footer.note') }}</p>
 
-        <nav class="footer__columns" aria-label="پیوندهای پاصفحه">
+        <nav class="footer__columns" :aria-label="t('footer.nav')">
           <div
             v-for="column in FOOTER_COLUMNS"
-            :key="column.title"
+            :key="column.titleKey"
             class="footer__column"
           >
-            <h2 class="footer__heading">{{ column.title }}</h2>
+            <h2 class="footer__heading">{{ t(column.titleKey) }}</h2>
             <ul class="footer__list">
-              <li v-for="link in column.links" :key="link.to + link.label">
-                <!-- An absolute URL is a real external link (social profiles):
-                     a new tab with the opener severed. Everything else is a
-                     router link, so in-app navigation stays client-side. -->
-                <a
-                  v-if="isExternal(link.to)"
-                  class="footer__link"
-                  :class="{ 'footer__link--accent': link.accent }"
-                  :href="link.to"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <AppIcon v-if="link.icon" :name="link.icon" :size="16" filled />
-                  <span>{{ link.label }}</span>
-                </a>
-
+              <li v-for="link in column.links" :key="link.labelKey + link.to">
                 <NuxtLink
-                  v-else
                   class="footer__link"
                   :class="{ 'footer__link--accent': link.accent }"
                   :to="link.to"
                 >
                   <AppIcon v-if="link.icon" :name="link.icon" :size="16" filled />
-                  <span>{{ link.label }}</span>
+                  <span>{{ t(link.labelKey) }}</span>
                 </NuxtLink>
+              </li>
+            </ul>
+          </div>
+
+          <!--
+            Social profiles are external by definition, so this column renders
+            plain anchors (new tab, opener severed) instead of router links.
+          -->
+          <div class="footer__column">
+            <h2 class="footer__heading">{{ t('footer.social.title') }}</h2>
+            <ul class="footer__list">
+              <li v-for="social in socialColumn" :key="social.icon">
+                <a
+                  class="footer__link"
+                  :href="social.href"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <SocialIcon :name="social.icon" :size="18" />
+                  <span>{{ social.label }}</span>
+                </a>
               </li>
             </ul>
           </div>
@@ -85,21 +98,25 @@ function isExternal(to: string): boolean {
         <div class="footer__legal">
           <p class="footer__copyright">
             <span class="footer__credit">© {{ year }} {{ SITE_NAME }}</span>
-            {{ FOOTER_COPYRIGHT }}
+            {{ t('footer.copyright') }}
           </p>
 
           <ul class="footer__social">
-            <li v-for="social in SOCIAL_LINKS" :key="social.icon">
+            <li v-for="social in socialLinks" :key="social.icon">
               <a
                 class="footer__social-link"
                 :class="{ 'footer__social-link--accent': social.accent }"
                 :href="social.href"
                 target="_blank"
                 rel="noopener noreferrer"
-                :title="social.label"
-                :aria-label="`${SITE_NAME} در ${social.label}`"
+                :aria-label="
+                  t('footer.social.onPlatform', {
+                    site: SITE_NAME,
+                    platform: social.label
+                  })
+                "
               >
-                <AppIcon :name="social.icon" :size="18" filled />
+                <SocialIcon :name="social.icon" :size="38" />
               </a>
             </li>
           </ul>
@@ -112,7 +129,7 @@ function isExternal(to: string): boolean {
               :href="badge.href"
               target="_blank"
               rel="noopener noreferrer"
-              :aria-label="badge.label"
+              :aria-label="t(badge.labelKey)"
             >
               <!-- Decorative: the anchor's label already names the badge. -->
               <img :src="badge.src" alt="" loading="lazy" decoding="async">
@@ -257,31 +274,28 @@ function isExternal(to: string): boolean {
   margin: 0;
 }
 
-/* Round tiles, as in the design: the brand mark sits in a filled circle, and the
-   one the design highlights (#E20054) is solid rather than tinted. */
+/*
+ * The badge is the mark: SocialIcon draws a full disc with the glyph knocked
+ * out, so the disc's own colour IS the tile. Colour alone separates the muted
+ * pink badges from the one the design accents (#E20054).
+ */
 .footer__social-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
   border-radius: var(--radius-pill);
   color: var(--footer-icon);
-  background-color: var(--color-accent-soft);
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
 
 .footer__social-link--accent {
-  color: var(--color-accent-contrast);
-  background-color: var(--footer-accent);
+  color: var(--footer-accent);
 }
 
 .footer__social-link:hover {
-  color: var(--color-accent-contrast);
-  background-color: var(--footer-accent);
+  color: var(--footer-accent);
   transform: translateY(-2px);
 }
 

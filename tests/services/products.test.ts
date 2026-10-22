@@ -31,7 +31,9 @@ const validPayload = {
   price: 55.99,
   description: 'great outerwear',
   category: "men's clothing",
-  image: 'https://fakestoreapi.com/img/3.jpg',
+  // A neutral placeholder: the payload shape is what matters here, and the
+  // suite never loads the image.
+  image: 'https://example.test/img/3.jpg',
   rating: { rate: 4.7, count: 500 }
 }
 
@@ -50,7 +52,9 @@ describe('normaliseProduct', () => {
   it('repairs missing fields instead of rendering undefined', () => {
     const result = normaliseProduct({ id: 7, title: null, price: 'nope' })
     expect(result).not.toBeNull()
-    expect(result?.title).toBe('محصول بدون نام')
+    // The title stays empty: the service layer is locale-free, so the missing
+    // name is translated at the render site (`product.untitled`).
+    expect(result?.title).toBe('')
     expect(result?.price).toBe(0)
     expect(result?.category).toBe('uncategorised')
     expect(result?.rating).toEqual({ rate: 0, count: 0 })
@@ -97,14 +101,13 @@ describe('fetchProducts', () => {
 
   it('propagates a normalised ApiError when the API fails', async () => {
     fetchMock.mockRejectedValue({ status: 500 })
-    await expect(fetchProducts()).rejects.toThrow(
-      'فروشگاه در این لحظه دچار مشکل است.'
-    )
+    // The error carries an i18n *key*, not display copy — the UI resolves it.
+    await expect(fetchProducts()).rejects.toThrow('errors.server')
   })
 
   it('reports a connection problem when no status is available', async () => {
     fetchMock.mockRejectedValue(new Error('socket hang up'))
-    await expect(fetchProducts()).rejects.toThrow(/دسترسی به فروشگاه/)
+    await expect(fetchProducts()).rejects.toThrow('errors.network')
   })
 })
 

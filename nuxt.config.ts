@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Nuxt } from 'nuxt/schema'
 import { defineNuxtConfig } from 'nuxt/config'
+import { SOCIAL_LINK_DEFAULTS } from './constants/site'
 
 /**
  * Seeds `<buildDir>/manifest/meta/<buildId>.json` as early as possible.
@@ -45,9 +46,14 @@ function seedDevAppManifest(nuxt: Nuxt) {
  * Decisions:
  * - SSR enabled (default) so the catalog and product pages are server-rendered,
  *   giving fast first paint and shareable/SEO-friendly URLs.
- * - Runtime config exposes the API base URL so it can be overridden per
- *   environment without code changes.
+ * - Runtime config exposes the API base URL and the social profile URLs so they
+ *   can be overridden per environment (`.env` / NUXT_PUBLIC_* vars) without code
+ *   changes. The social defaults are imported from `constants/site.ts` so the
+ *   code, the config and the tests share one source of truth.
  * - Global stylesheet carries design tokens + reset + base typography.
+ * - i18n keeps the storefront Persian-first (`fa`, RTL) with an English message
+ *   catalogue ready alongside it; `htmlAttrs[lang|dir]` and the default document
+ *   title/description are applied per locale from `app.vue` via `useLocaleHead`.
  */
 export default defineNuxtConfig({
   hooks: {
@@ -61,7 +67,20 @@ export default defineNuxtConfig({
 
   // Flat-config ESLint (Nuxt's official setup). The generated config lives in
   // eslint.config.mjs and is produced by `nuxt prepare`.
-  modules: ['@nuxt/eslint'],
+  modules: ['@nuxt/eslint', '@nuxtjs/i18n'],
+
+  // Persian-first, single-domain storefront: no locale segment in the URL and
+  // no browser-language sniffing — the declared locale (fa) always wins.
+  i18n: {
+    defaultLocale: 'fa',
+    strategy: 'no_prefix',
+    detectBrowserLanguage: false,
+    langDir: 'locales',
+    locales: [
+      { code: 'fa', language: 'fa-IR', name: 'فارسی', dir: 'rtl', files: ['fa.json'] },
+      { code: 'en', language: 'en-US', name: 'English', dir: 'ltr', files: ['en.json'] }
+    ]
+  },
 
   typescript: {
     strict: true,
@@ -84,26 +103,34 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // Override with NUXT_PUBLIC_API_BASE at build/runtime if needed.
-      apiBase: 'https://fakestoreapi.com'
+      /**
+       * The API base URL is *configuration*, not code.
+       *
+       * It is read from the `NUXT_PUBLIC_API_BASE` environment variable (see
+       * `.env.example`) instead of being written here, so the same build can be
+       * pointed at a different backend — or at a local mock — without a code
+       * change. The default is deliberately empty: `services/api/client.ts`
+       * treats a missing value as a misconfiguration and fails loudly rather
+       * than silently issuing requests against the wrong host.
+       *
+       * Nuxt applies the env override at runtime on the server and inlines it
+       * into the client bundle at build time, so the value must be present in
+       * the environment when the app is built.
+       */
+      apiBase: process.env.NUXT_PUBLIC_API_BASE ?? '',
+      // Footer social profile URLs — override with NUXT_PUBLIC_SOCIAL_<NAME>.
+      social: SOCIAL_LINK_DEFAULTS
     }
   },
 
   app: {
     head: {
-      // The storefront is Persian-only, so the document is declared RTL for
-      // real. Everything else in the CSS is authored with logical properties
-      // (inline-start / inline-end) so the whole layout mirrors correctly.
-      htmlAttrs: { lang: 'fa', dir: 'rtl' },
-      title: 'Aurora — کالاهای روزمره',
+      // `lang`/`dir` and the default title/description are set per locale in
+      // app.vue (useLocaleHead + t()), so they stay correct if the locale ever
+      // switches away from the default.
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        {
-          name: 'description',
-          content:
-            'Aurora یک فروشگاه سریع و دسترس‌پذیر برای کالاهای روزمره است؛ کاتالوگ منتخب را مرور کنید، جست‌وجو کنید و بر پایه قیمت یا امتیاز مرتب کنید.'
-        },
         { name: 'theme-color', content: '#101828' }
       ],
       link: [

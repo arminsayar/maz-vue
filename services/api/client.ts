@@ -6,11 +6,17 @@
  * import `apiFetch` rather than calling `$fetch` directly, which keeps the
  * endpoint code thin and the cross-cutting concerns centralised.
  *
- * The base URL comes from Nuxt runtime config (overridable via the
- * NUXT_PUBLIC_API_BASE env var) and falls back to the public Fake Store API.
+ * The base URL comes from Nuxt runtime config, which is populated from the
+ * `NUXT_PUBLIC_API_BASE` environment variable (see `.env.example`). There is
+ * deliberately **no** hard-coded host in this file: the API location is
+ * deployment configuration, not code, so it belongs in the environment. A
+ * missing value is a misconfiguration and fails loudly (see `resolveBaseUrl`)
+ * rather than silently falling back to some baked-in URL.
+ *
+ * `ApiError.message` carries an i18n key (`errors.*`), not display copy: the
+ * service layer stays locale-free and the UI resolves the message with `t()`,
+ * so the same error renders in whatever locale is active.
  */
-
-export const DEFAULT_API_BASE = 'https://fakestoreapi.com'
 
 /** Normalised error surfaced to UI states, independent of the fetch library. */
 export class ApiError extends Error {
@@ -23,21 +29,42 @@ export class ApiError extends Error {
   }
 }
 
+/** The environment variable that supplies the API base URL. */
+export const API_BASE_ENV_KEY = 'NUXT_PUBLIC_API_BASE'
+
+/**
+ * Resolve the API base URL from the runtime config.
+ *
+ * Throws when it is missing: an empty base would make every request hit the
+ * app's own origin, which fails in a far more confusing way than an explicit
+ * error naming the variable to set.
+ */
 function resolveBaseUrl(): string {
+  let base: string | undefined
+
   try {
     // Available inside the Nuxt app context (SSR + client).
-    const config = useRuntimeConfig()
-    return config?.public?.apiBase || DEFAULT_API_BASE
+    base = useRuntimeConfig()?.public?.apiBase
   } catch {
-    // Outside Nuxt (unit tests / scripts) fall back to the public API.
-    return DEFAULT_API_BASE
+    // Outside Nuxt (unit tests / scripts) there is no runtime config.
+    base = undefined
   }
+
+  const trimmed = (base ?? '').trim()
+  if (!trimmed) {
+    throw new ApiError(
+      `Missing API base URL. Set ${API_BASE_ENV_KEY} in your .env file.`
+    )
+  }
+
+  return trimmed
 }
 
+/** i18n key for a given HTTP status; the UI resolves it with `t()`. */
 function statusToMessage(status: number): string {
-  if (status === 404) return 'آنچه به دنبالش بودید پیدا نشد.'
-  if (status >= 500) return 'فروشگاه در این لحظه دچار مشکل است.'
-  return 'هنگام بارگذاری کاتالوگ مشکلی پیش آمد.'
+  if (status === 404) return 'errors.notFound'
+  if (status >= 500) return 'errors.server'
+  return 'errors.request'
 }
 
 /**
@@ -59,9 +86,7 @@ export async function apiFetch<T>(path: string): Promise<T> {
   } catch (error: unknown) {
     const status = extractStatus(error)
     const message =
-      status !== undefined
-        ? statusToMessage(status)
-        : 'دسترسی به فروشگاه ممکن نشد. اتصال خود را بررسی کنید و دوباره تلاش کنید.'
+      status !== undefined ? statusToMessage(status) : 'errors.network'
     throw new ApiError(message, status)
   }
 }

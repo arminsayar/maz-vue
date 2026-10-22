@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { SortKey } from '~/types/catalog'
-
-/**
- * Persian numerals for user-facing counts. `Intl` gives the Persian digits and
- * the Persian thousands separator without any manual digit mapping.
- */
-const numberFormatter = new Intl.NumberFormat('fa-IR')
+import { useFormatters } from '~/composables/useFormatters'
 
 /**
  * Catalog filter panel.
@@ -21,6 +17,10 @@ const numberFormatter = new Intl.NumberFormat('fa-IR')
  * than the design shows and with a chevron that flips when open. They are
  * `open` by default because the design shows every option, and the native
  * element keeps the disclosure keyboard- and screen-reader-accessible for free.
+ *
+ * The result count uses the singular/plural message pair (with the count already
+ * formatted in locale digits) rather than vue-i18n's numeric pluralisation,
+ * because a pre-formatted Persian-digit string can no longer drive the latter.
  */
 const props = defineProps<{
   categories: ReadonlyArray<string>
@@ -36,19 +36,25 @@ const emit = defineEmits<{
   'update:sort': [value: SortKey]
 }>()
 
-const countLabel = computed(
-  () => `${numberFormatter.format(props.resultCount)} محصول`
+const { t } = useI18n()
+const { integer } = useFormatters()
+
+const countLabel = computed(() =>
+  t(
+    props.resultCount === 1 ? 'catalog.resultsOne' : 'catalog.resultsMany',
+    { count: integer(props.resultCount) }
+  )
 )
 </script>
 
 <template>
-  <aside class="panel" aria-label="فیلتر و جستجو">
+  <aside class="panel" :aria-label="t('catalog.title')">
     <section class="fbox">
-      <h2 class="fbox__title">فیلتر و جستجو</h2>
+      <h2 class="fbox__title">{{ t('catalog.title') }}</h2>
       <div class="fbox__body">
         <SearchInput
           :model-value="search"
-          submit-label="جستجو"
+          submit
           @update:model-value="emit('update:search', $event)"
         />
       </div>
@@ -56,7 +62,7 @@ const countLabel = computed(
 
     <details class="fbox" open>
       <summary class="fbox__head">
-        <span class="fbox__title">مرتب سازی</span>
+        <span class="fbox__title">{{ t('catalog.sort.title') }}</span>
         <AppIcon class="fbox__chevron" name="chevron-down" :size="16" />
       </summary>
       <div class="fbox__body">
@@ -69,7 +75,7 @@ const countLabel = computed(
 
     <details class="fbox" open>
       <summary class="fbox__head">
-        <span class="fbox__title">دسته بندی</span>
+        <span class="fbox__title">{{ t('catalog.categories.title') }}</span>
         <AppIcon class="fbox__chevron" name="chevron-down" :size="16" />
       </summary>
       <div class="fbox__body">

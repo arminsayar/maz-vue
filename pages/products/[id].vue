@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ProductDetail } from '~/types/product'
 import { fetchProduct, fetchProductsByCategory } from '~/services/products'
 import { SITE_NAME } from '~/constants/site'
@@ -20,6 +21,7 @@ import { truncate } from '~/utils/format'
  * The breadcrumb is derived from the same data, so it is correct on a direct
  * visit and updates when the user navigates on to another product.
  */
+const { t, te } = useI18n()
 
 const route = useRoute()
 
@@ -69,13 +71,23 @@ type Crumb = { label: string; to?: string; icon?: 'home'; hideLabel?: boolean }
 
 const crumbs = computed<Crumb[]>(() => {
   const trail: Crumb[] = [
-    { label: 'خانه', to: '/', icon: 'home', hideLabel: true },
-    { label: 'لیست محصولاتها', to: '/' }
+    { label: t('product.breadcrumb.home'), to: '/', icon: 'home', hideLabel: true },
+    { label: t('product.breadcrumb.listing'), to: '/' }
   ]
 
   if (product.value) trail.push({ label: truncate(product.value.title, 48) })
 
   return trail
+})
+
+/**
+ * The API client reports failures as `errors.*` i18n keys; translate the key
+ * when it is one, otherwise fall back to the generic copy so a raw, unexpected
+ * message never leaks into the page.
+ */
+const errorDescription = computed(() => {
+  const key = error.value?.message
+  return key && te(key) ? t(key) : t('product.empty.errorDescription')
 })
 
 // Signal a proper 404 to crawlers for genuinely missing products. A watcher
@@ -89,10 +101,10 @@ watchEffect(() => {
 // description stay correct when navigating between products (the route
 // component is reused, so setup does not re-run).
 useSeoMeta({
-  title: () => `${product.value?.title ?? 'محصول'} — ${SITE_NAME}`,
+  title: () =>
+    `${product.value?.title || t('product.seo.titleFallback')} — ${SITE_NAME}`,
   description: () =>
-    product.value?.description?.slice(0, 155) ??
-    'مشاهدهٔ جزئیات، قیمت و امتیاز محصول.'
+    product.value?.description?.slice(0, 155) || t('product.seo.descriptionFallback')
 })
 </script>
 
@@ -119,23 +131,23 @@ useSeoMeta({
       v-else-if="hasError"
       icon="alert"
       tone="danger"
-      title="بارگذاری این محصول ممکن نشد"
-      :description="
-        error?.message || 'مشکلی پیش آمد. لطفاً کمی بعد دوباره تلاش کنید.'
-      "
+      :title="t('product.empty.errorTitle')"
+      :description="errorDescription"
     >
-      <BaseButton :loading="isLoading" @click="refresh()">تلاش دوباره</BaseButton>
-      <BaseButton variant="secondary" to="/">بازگشت به فروشگاه</BaseButton>
+      <BaseButton :loading="isLoading" @click="refresh()">
+        {{ t('product.actions.retry') }}
+      </BaseButton>
+      <BaseButton variant="secondary" to="/">{{ t('product.actions.backToStore') }}</BaseButton>
     </EmptyState>
 
     <!-- Not found -->
     <EmptyState
       v-else-if="isNotFound"
       icon="search"
-      title="محصول پیدا نشد"
-      description="این محصول وجود ندارد یا پیوندی که باز کردهاید قدیمی است. احتمالاً از کاتالوگ حذف شده است."
+      :title="t('product.empty.notFoundTitle')"
+      :description="t('product.empty.notFoundDescription')"
     >
-      <BaseButton to="/">مرور همهٔ محصولات</BaseButton>
+      <BaseButton to="/">{{ t('product.actions.browseAll') }}</BaseButton>
     </EmptyState>
 
     <!-- Loaded -->
@@ -147,7 +159,9 @@ useSeoMeta({
       class="detail__related"
       aria-labelledby="related-heading"
     >
-      <h2 id="related-heading" class="detail__related-title">محصولات مشابه</h2>
+      <h2 id="related-heading" class="detail__related-title">
+        {{ t('product.related.title') }}
+      </h2>
       <ProductGrid :products="related" :eager-count="0" />
     </section>
   </div>

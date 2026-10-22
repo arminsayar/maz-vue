@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatCategoryLabel } from '~/utils/format'
+import { useI18n } from 'vue-i18n'
+import { useFormatters } from '~/composables/useFormatters'
 
 /**
  * Category filter — a multi-select checkbox group.
@@ -13,6 +14,7 @@ import { formatCategoryLabel } from '~/utils/format'
  * No "all" row is needed — an empty selection already means "everything" — so
  * the list mirrors the design exactly. Because it is a plain checkbox group it
  * is keyboard-operable, screen-reader-friendly and label-associated for free.
+ * Labels follow the active locale via `useFormatters().categoryLabel`.
  */
 const props = defineProps<{
   categories: ReadonlyArray<string>
@@ -21,10 +23,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string[]] }>()
 
+const { t } = useI18n()
+const { categoryLabel } = useFormatters()
+
 const options = computed(() =>
   props.categories.map((category) => ({
     value: category,
-    label: formatCategoryLabel(category)
+    label: categoryLabel(category)
   }))
 )
 
@@ -39,7 +44,7 @@ function toggle(value: string): void {
 </script>
 
 <template>
-  <div class="cats" role="group" aria-label="فیلتر بر پایهٔ دستهبندی">
+  <div class="cats" role="group" :aria-label="t('catalog.categories.filterAria')">
     <label
       v-for="option in options"
       :key="option.value"
