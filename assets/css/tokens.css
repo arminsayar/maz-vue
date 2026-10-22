@@ -1,0 +1,179 @@
+/**
+ * Design tokens — single source of truth for the visual language.
+ *
+ * ASSUMPTION: the referenced Figma file was not accessible in this environment
+ * (auth-gated SPA, no MCP server, no API token), so these tokens were authored
+ * deliberately to produce a cohesive, premium storefront rather than to match
+ * specific frames. See README "Assumptions". If Figma access is restored, this
+ * file is the only place that needs to change to re-skin the whole app.
+ *
+ * The palette is paired with a Persian-first RTL typographic scale: zero
+ * letter-spacing (Arabic script is cursive) and a loosened line-height scale.
+ */
+
+:root {
+  /* Brand & accent.
+     The design uses one magenta (#E20054) for the primary action and for every
+     "chosen" affordance — chips, checkboxes, radios, breadcrumb links, the
+     header's contact button and the footer highlight. */
+  --color-accent: #e20054;
+  --color-accent-hover: #c40049;
+  --color-accent-active: #9c003a;
+  --color-accent-soft: #fde7ef;
+  --color-accent-contrast: #ffffff;
+
+  /* Semantic alias for "this control is selected". Same magenta as the accent,
+     but named for intent, so a component reads `--color-active` wherever it
+     means "chosen" rather than "brand". */
+  --color-active: var(--color-accent);
+
+  /* Surfaces.
+     `--color-bg` is the page canvas that sits *behind* every white card and
+     band — the header bar, the catalog tiles and the footer's main band are all
+     `--color-surface` (white) on top of it. It is therefore the cool blue-grey
+     from the design (#E9EDF5) rather than a warm off-white: the tonal gap
+     between canvas and card is what makes those panels read as raised. */
+  --color-bg: #e9edf5;
+  --color-surface: #ffffff;
+  /* Cool neutrals to match the blue-grey canvas; the old warm greys read as a
+     different (beige) palette once the accent turned magenta. */
+  --color-surface-subtle: #f1f4f9;
+  --color-surface-sunken: #e6ecf5;
+
+  /* Text hierarchy. The design's ink is a dark navy rather than near-black. */
+  --color-ink: #0a2a51;
+  --color-ink-muted: #3f5570;
+  --color-ink-subtle: #7086a3;
+
+  /* Borders & dividers */
+  --color-border: #e3e9f2;
+  --color-border-strong: #cfd9e7;
+  --color-border-focus: #e20054;
+
+  /* Feedback */
+  --color-danger: #b42318;
+  --color-danger-soft: #fef3f2;
+  --color-danger-border: #fecdca;
+  --color-star: #e0a82e;
+
+  /* Focus ring */
+  --ring-width: 3px;
+  --ring-offset: 2px;
+  --ring-color: rgba(226, 0, 84, 0.28);
+
+  /* Typography.
+
+     The Figma file specifies **Yekan Bakh**, which is a licensed (paid) family
+     and therefore cannot be self-hosted or fetched from a public CDN without a
+     licence. The stack below resolves in that order of preference:
+
+       1. `Yekan Bakh` — used whenever the licensed files are present (dropped
+          into `public/fonts/` and declared in `assets/css/yekan-bakh.css`, or
+          installed on the machine). Nothing else needs to change to switch to
+          the real family.
+       2. `Yekan`      — the free sibling of the same foundry, loaded from the
+          Persian webfont CDN configured in `nuxt.config.ts`. Closest available
+          match to the design's letterforms.
+       3. `Vazirmatn`  — the app-wide open font (Google Fonts), which also
+          covers the 500/600 weights `Yekan` does not ship.
+       4. System UI fonts.
+
+     All four are Persian-first families with matching Latin glyphs, so mixed
+     strings (product titles from the API) keep one visual rhythm whichever one
+     wins. */
+  --font-sans: 'Yekan Bakh', 'Yekan', 'Vazirmatn', 'Segoe UI', Tahoma, system-ui,
+    -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  --font-display: 'Yekan Bakh', 'Yekan', 'Vazirmatn', 'Segoe UI', Tahoma, Georgia,
+    serif;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.875rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.5rem;
+  --fs-3xl: 2rem;
+  --fs-4xl: 2.75rem;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Persian script has taller ascenders/descenders and needs more leading than
+     Latin to stay readable, so the scale is loosened across the board. */
+  --lh-tight: 1.35;
+  --lh-snug: 1.55;
+  --lh-normal: 1.75;
+  --lh-relaxed: 1.95;
+
+  /* Arabic-script text is cursive: any letter-spacing visually breaks the
+     joins between letters, so both tracking tokens are neutralised. */
+  --ls-tight: 0;
+  --ls-wide: 0;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* Shadows — tinted navy rather than warm black, so they stay neutral on the
+     blue-grey canvas. */
+  --shadow-xs: 0 1px 2px rgba(10, 42, 81, 0.05);
+  --shadow-sm: 0 2px 6px rgba(10, 42, 81, 0.07);
+  --shadow-md: 0 8px 20px -6px rgba(10, 42, 81, 0.14);
+  --shadow-lg: 0 18px 40px -12px rgba(10, 42, 81, 0.2);
+  /* The raised white panels of the catalog / product page (filter boxes, cards,
+     spec sheet) use one soft, wide shadow. */
+  --shadow-panel: 0 6px 24px -10px rgba(10, 42, 81, 0.12);
+
+  /* Layout */
+  --container-max: 1200px;
+  --container-narrow: 760px;
+  --gutter: var(--space-4);
+  --header-height: 68px;
+
+  /* Z-index */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-overlay: 200;
+  --z-drawer: 300;
+  --z-modal: 400;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: var(--space-8);
+    --fs-4xl: 3.25rem;
+  }
+}

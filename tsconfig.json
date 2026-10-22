@@ -1,0 +1,9 @@
+{
+  // Nuxt generates the full strict TS config; this file only extends it.
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    // `.nuxt/tsconfig.json` sets `types: []` so nothing leaks in implicitly.
+    // `vitest.config.ts` uses `node:url`, so Node's types are opted into here.
+    "types": ["node"]
+  }
+}
