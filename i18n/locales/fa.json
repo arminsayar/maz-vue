@@ -41,7 +41,7 @@
       }
     },
     "social": {
-      "title": "شبکههای اجتماعی",
+      "title": "شبکه‌های اجتماعی",
       "onPlatform": "{site} در {platform}"
     },
     "badges": {
@@ -130,7 +130,7 @@
     },
     "breadcrumb": {
       "home": "خانه",
-      "listing": "لیست محصولاتها"
+      "listing": "لیست محصولات"
     },
     "related": {
       "title": "محصولات مشابه"

@@ -261,6 +261,12 @@ onBeforeUnmount(() => {
   align-items: stretch;
 }
 
+@media (max-width: 640px) {
+  .spec__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .spec__term,
 .spec__value {
   display: flex;

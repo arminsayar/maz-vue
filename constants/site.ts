@@ -108,7 +108,7 @@ export interface FooterLink {
 
 /**
  * Footer link sections — the design's two link columns (دسترسی سریع and
- * راهنمای سایت). The third column (شبکههای اجتماعی) is rendered from
+ * راهنمای سایت). The third column (شبکه‌های اجتماعی) is rendered from
  * `useSocialLinks()` because its labels and hrefs are locale/env driven.
  *
  * The demo has no CMS or auth routes, so the informational links all land on the
@@ -139,7 +139,7 @@ export const FOOTER_COLUMNS: ReadonlyArray<{
 ]
 
 /**
- * The social brands the design lists in the footer's «شبکههای اجتماعی»
+ * The social brands the design lists in the footer's «شبکه‌های اجتماعی»
  * column (a subset of the full badge row below it).
  */
 export const FOOTER_SOCIAL_COLUMN: ReadonlyArray<SocialIconName> = [

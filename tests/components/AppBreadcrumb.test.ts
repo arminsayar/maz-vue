@@ -9,7 +9,7 @@ import AppBreadcrumb from '~/components/ui/AppBreadcrumb.vue'
  */
 const items = [
   { label: 'خانه', to: '/', icon: 'home' as const, hideLabel: true },
-  { label: 'لیست محصولاتها', to: '/' },
+  { label: 'لیست محصولات', to: '/' },
   { label: 'درب اتوماتیک بازویی' }
 ]
 
