@@ -97,7 +97,7 @@ const socialColumn = socialLinks.filter((social) =>
       <div class="container footer__bar-inner">
         <div class="footer__legal">
           <p class="footer__copyright">
-            <span class="footer__credit">© {{ year }} {{ SITE_NAME }}</span>
+            <!-- <span class="footer__credit">© {{ year }} {{ SITE_NAME }}</span> -->
             {{ t('footer.copyright') }}
           </p>
 

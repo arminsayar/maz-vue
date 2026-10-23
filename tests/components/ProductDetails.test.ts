@@ -57,7 +57,7 @@ describe('ProductDetails', () => {
     expect(wrapper.get('.rating__value').text()).toBe('۳٫۹')
     expect(wrapper.get('.rating__count').text()).toBe('۷۰ نظر')
     expect(wrapper.get('.rating__stars').attributes('aria-label')).toBe(
-      'امتیاز ۳٫۹ از ۵ بر پایهٔ ۷۰ نظر'
+      'امتیاز ۳٫۹ از ۵ بر پایه ۷۰ نظر'
     )
   })
 

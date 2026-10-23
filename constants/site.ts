@@ -8,7 +8,7 @@
  * `footer.social.*` messages, which is why those templates carry a `{site}`
  * placeholder.
  */
-export const SITE_NAME = 'Aurora'
+export const SITE_NAME = ''
 
 /**
  * The literal subset of `AppIcon` names the header may use. Declared here (rather

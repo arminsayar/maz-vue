@@ -23,7 +23,7 @@ describe('StarRating', () => {
     const wrapper = mount(StarRating, { props: { rate: 4.5, count: 12 } })
 
     expect(wrapper.get('.rating__stars').attributes('aria-label')).toBe(
-      'امتیاز ۴٫۵ از ۵ بر پایهٔ ۱۲ نظر'
+      'امتیاز ۴٫۵ از ۵ بر پایه ۱۲ نظر'
     )
     expect(wrapper.get('.rating__value').text()).toBe('۴٫۵')
     expect(wrapper.get('.rating__count').text()).toBe('۱۲ نظر')
